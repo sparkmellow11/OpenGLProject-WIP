@@ -39,6 +39,7 @@ struct Window
     float lastFrameTime = 0.0f;
     float currentFrameTime = 0.0f;
     float deltaTime = 0.0f;
+    float frameCounter = 0;
 
     int currentUIElement = 0;
     bool combatUIStart = false;
@@ -68,4 +69,5 @@ struct Window
     bool positiveEdgeCheck(GLFWwindow* window, GLint key);
     bool negativeEdgeCheck(GLFWwindow* window, GLint key);
     int processCombatUIInput(GLFWwindow* window, int currentUIElement, int maxUIElements);
+    void FPSCounterTitle();
 };

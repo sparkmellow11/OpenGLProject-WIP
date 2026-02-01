@@ -5,7 +5,7 @@
 
 Model::Model(const char* path)
 {
-    loadModel(path);
+    loadModel(projectRoot + path);
 }
 
 void Model::Draw(const Shader &shader) const
@@ -117,7 +117,14 @@ std::vector<Texture> Model::loadMaterialTextures(const aiMaterial* mat, const ai
         { // if texture hasn’t been loaded already, load it
             Texture texture;
             texture.id = TextureFromFile(str.C_Str(), directory);
-            texture.type = typeName;
+            if (typeName == "texture_diffuse")
+            {
+                texture.type = TextureType::Diffuse;
+            }
+            else if (typeName == "texture_specular")
+            {
+                texture.type = TextureType::Specular;
+            }
             texture.path = str.C_Str();
             textures.push_back(texture);
             textures_loaded.push_back(texture);

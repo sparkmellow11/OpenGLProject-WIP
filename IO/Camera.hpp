@@ -35,17 +35,16 @@ public:
 
     [[nodiscard]] glm::vec3 GetScreenUpDirection() const;
 
-    void UpdateFallingPhysics(glm::vec3& position, glm::vec3& velocity, float deltaTime);
-
 //private:
     float colatitude;
     float azimuth;
     glm::vec3 position;
     glm::vec3 velocity;
     glm::vec3 facingDirection;
-    glm::vec3 upDirection;
+    glm::vec3 upAxisDirection;
     float sensitivity;
     float fov;
     float speed;
+    bool locked = false;
 
 };

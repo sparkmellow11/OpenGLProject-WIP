@@ -4,6 +4,10 @@
 
 #include "Rectangle.hpp"
 
+Rectangle::Rectangle(const char* path) : Rectangle(1.0f,1.0f,path)
+{
+}
+
 Rectangle::Rectangle(const float horizontalLength, const float verticalLength, const char* path)
 {
     vertices[0].Position = {-horizontalLength/2.0f, -verticalLength/2.0f, 0.0f};
@@ -31,27 +35,34 @@ Rectangle::Rectangle(const float horizontalLength, const float verticalLength, c
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(indices[0]), &indices[0], GL_STATIC_DRAW);
 
-    //position attrib
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertices[0]), (void*)0);
-    //normal attrib
+
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vertices[0]), (void*)offsetof(Vertex, Normal));
-    //texture attrib
+
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(vertices[0]), (void*)offsetof(Vertex, TexCoords));
 
     glBindVertexArray(0);
 
     texture.id = TextureFromFile(path, PROJECT_ROOT);
-    texture.type = "texture_diffuse";
+    texture.type = TextureType::Diffuse;
 }
 
 void Rectangle::Draw(const Shader& shader) const
 {
     glActiveTexture(GL_TEXTURE0); // activate texture unit first
     // retrieve texture number (the N in diffuse_textureN)
-    const std::string name = texture.type;
+    std::string name;
+    if (texture.type == TextureType::Diffuse)
+    {
+        name = "texture_diffuse";
+    }
+    else if (texture.type == TextureType::Specular)
+    {
+        name = "texture_specular";
+    }
     const std::string number = "1";
     shader.setFloat((name + number).c_str(), 0.0f);
     glBindTexture(GL_TEXTURE_2D, texture.id);

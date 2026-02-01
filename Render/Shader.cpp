@@ -13,14 +13,17 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
     std::string fragmentCode;
     std::ifstream vShaderFile;
     std::ifstream fShaderFile;
+
+    //uncomment the cout below if the program keeps failing for no reason
+    std::cout << "lol" << std::endl;
     // ensure ifstream objects can throw exceptions:
     vShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
     fShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
     try
     {
         // open files
-        vShaderFile.open(vertexPath);
-        fShaderFile.open(fragmentPath);
+        vShaderFile.open(projectRoot + vertexPath);
+        fShaderFile.open(projectRoot + fragmentPath);
         std::stringstream vShaderStream, fShaderStream;
         // read file’s buffer contents into streams
         vShaderStream << vShaderFile.rdbuf();
@@ -34,7 +37,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
     }
     catch(std::ifstream::failure e)
     {
-        std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+        std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
     }
     const char* vShaderCode = vertexCode.c_str();
     const char* fShaderCode = fragmentCode.c_str();
@@ -121,10 +124,10 @@ void Shader::setVec4(const std::string& name, const float *vec) const
 
 
 
-void Shader::setModelMatrix(const glm::vec3& translation, const glm::vec3& scaling,
-                            const float rotation, const glm::vec3& rotationAxis)
+void Shader::setModelMatrix(glm::mat4& modelMatrix, const glm::vec3& translation, const glm::vec3& scaling,
+                            const float rotation, const glm::vec3& rotationAxis) const
 {
-    auto modelMatrix = glm::mat4(1.0f);
+    modelMatrix = glm::mat4(1.0f);
     modelMatrix = glm::translate(modelMatrix, translation);
     modelMatrix = glm::scale(modelMatrix, scaling);
     modelMatrix = glm::rotate(modelMatrix, rotation, rotationAxis);
@@ -132,34 +135,34 @@ void Shader::setModelMatrix(const glm::vec3& translation, const glm::vec3& scali
 
 }
 
-void Shader::setModelMatrix(const glm::vec3& translation, const glm::vec3& scaling)
+void Shader::setModelMatrix(glm::mat4& modelMatrix, const glm::vec3& translation, const glm::vec3& scaling) const
 {
-    auto modelMatrix = glm::mat4(1.0f);
+    modelMatrix = glm::mat4(1.0f);
     modelMatrix = glm::translate(modelMatrix, translation);
     modelMatrix = glm::scale(modelMatrix, scaling);
     setMat4("model", glm::value_ptr(modelMatrix));
 }
 
-void Shader::setModelMatrix(const glm::vec3& translation, const glm::vec3& scaling,
-    const float colatitude, const float azimuth)
+void Shader::setModelMatrix(glm::mat4& modelMatrix, const glm::vec3& translation, const glm::vec3& scaling,
+    const float colatitude, const float azimuth) const
 {
-    auto modelMatrix = glm::mat4(1.0f);
+    modelMatrix = glm::mat4(1.0f);
     modelMatrix = glm::translate(modelMatrix, translation);
     modelMatrix = glm::scale(modelMatrix, scaling);
-    modelMatrix = glm::rotate(modelMatrix, colatitude, -unitZ);
     modelMatrix = glm::rotate(modelMatrix, azimuth, unitY);
+    modelMatrix = glm::rotate(modelMatrix, colatitude, unitX);
     setMat4("model", glm::value_ptr(modelMatrix));
 }
 
-void Shader::setOrthoProjMatrix(const float halfWidth, const float halfHeight)
+void Shader::setOrthoProjMatrix(glm::mat4& projectionMatrix, const float halfWidth, const float halfHeight) const
 {
-    auto projectionMatrix = glm::ortho(-halfWidth,halfWidth,-halfHeight,halfHeight,-1.0f,1.0f);
+    projectionMatrix = glm::ortho(-halfWidth,halfWidth,-halfHeight,halfHeight,-1.0f,1.0f);
     setMat4("projection", glm::value_ptr(projectionMatrix));
 }
 
-void Shader::setPerspProjMatrix(const float fov, const float width, const float height)
+void Shader::setPerspProjMatrix(glm::mat4& projectionMatrix, const float fov, const float width, const float height) const
 {
-    auto projectionMatrix = glm::perspective(glm::radians(fov), width/height, 0.1f, 100.0f);
+    projectionMatrix = glm::perspective(glm::radians(fov), width/height, 0.1f, 100.0f);
     setMat4("projection", glm::value_ptr(projectionMatrix));
 }
 

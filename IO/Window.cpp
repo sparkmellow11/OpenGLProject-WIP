@@ -37,8 +37,6 @@ void Window::Init()
         throw std::runtime_error("Failed to initialize GLAD.\n");
     }
 
-    std::cout << "AAAAAAAAAAAAA LOL\n";
-
     glViewport(0,0,WIDTH,HEIGHT);
     glfwSetFramebufferSizeCallback(window,framebuffer_size_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -57,7 +55,7 @@ void Window::framebuffer_size_callback(GLFWwindow* window, const int width, cons
 
 void Window::mouse_callback(GLFWwindow* window, const double xpos, const double ypos)
 {
-    if (mouse.locked || !mouse.hidden) {return;}
+    if (mouse.enabled) {return;}
     if (mouse.firstMove)
     {
         mouse.lastX = static_cast<float>(xpos);
@@ -69,6 +67,7 @@ void Window::mouse_callback(GLFWwindow* window, const double xpos, const double 
     mouse.lastX = static_cast<float>(xpos);
     mouse.lastY = static_cast<float>(ypos);
 
+    if (camera.locked) {return;}
     camera.UpdateCamera({xoffset, yoffset});
 }
 
@@ -81,8 +80,8 @@ void Window::key_callback(GLFWwindow* window, const int key, const int scancode,
 {
     if (key == GLFW_KEY_0 && action == GLFW_PRESS)
     {
-        mouse.hidden = !mouse.hidden;
-        if (!mouse.hidden)
+        mouse.enabled = !mouse.enabled;
+        if (mouse.enabled)
         {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         } else
@@ -90,7 +89,6 @@ void Window::key_callback(GLFWwindow* window, const int key, const int scancode,
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         }
     }
-
 
 }
 
@@ -136,7 +134,7 @@ void Window::processMovementInput() const
     }
     if (isKeyPressed(GLFW_KEY_SPACE) && camera.GetPosition().y == 0.0f)
     {
-        camera.velocity += camera.GetUpDirection()*camera.speed*100.0f;
+        camera.velocity.y += camera.speed*100.0f;
     }
     if (isKeyPressed(GLFW_KEY_LEFT_CONTROL))
     {
@@ -212,3 +210,18 @@ int Window::processCombatUIInput(GLFWwindow* window, const int currentUIElement,
     return currentUIElement;
 }
 
+void Window::FPSCounterTitle()
+{
+    static float timeDiff = 0.0f;
+    timeDiff += deltaTime;
+    frameCounter += 1.0f;
+    if (timeDiff >= 1.0f / 30.0f)
+    {
+        std::string FPS = std::to_string(frameCounter / timeDiff);
+        std::string ms = std::to_string(timeDiff / frameCounter * 1000.0f);
+        std::string newTitle = "OpenGLProject - " + FPS + "FPS, " + ms + "ms";
+        glfwSetWindowTitle(window, newTitle.c_str());
+        timeDiff = 0.0f;
+        frameCounter = 0.0f;
+    }
+}

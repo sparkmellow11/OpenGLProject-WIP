@@ -6,15 +6,58 @@
 
 #include "Render/Shader.hpp"
 #include "Render/Model.hpp"
-#include "Render/Rectangle.hpp"
 #include "IO/Window.hpp"
 #include "ImGuiThing.hpp"
 
 #include "Utils.hpp"
 #include "Render/UISystem.hpp"
 #include "UtilsMain.hpp"
+#include "imgui/imgui_internal.h"
 
 
+void initGLSettings()
+{
+    //enable stuff
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    //glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
+    glFrontFace(GL_CW); // i guess
+    glfwSwapInterval(0);
+}
+
+/*
+void DrawHpBar(const Shader& shader, const Camera& camera, const UIElement& element, const glm::vec3& position, float ratio)
+{
+    ratio = std::clamp(ratio, 0.0f, 1.0f);
+
+    glDisable(GL_DEPTH_TEST);
+    auto modelMatrix = glm::mat4(1.0f);
+    modelMatrix = glm::translate(modelMatrix, position);
+    modelMatrix = glm::rotate(modelMatrix, glm::half_pi<float>()-camera.colatitude, -camera.GetLeftDirection());
+    modelMatrix = glm::rotate(modelMatrix, camera.azimuth-glm::half_pi<float>(), camera.upAxisDirection);
+    modelMatrix = glm::scale(modelMatrix, {element.scale,1.0f});
+    shader.setMat4("model", glm::value_ptr(modelMatrix));
+    auto maxHp = glm::vec4(0.0f,0.0f,0.0f,1.0f);
+    shader.setVec4("tintColor", glm::value_ptr(maxHp));
+    element.rect->Draw(shader);
+
+    modelMatrix = glm::mat4(1.0f);
+    modelMatrix = glm::translate(modelMatrix, position);
+    modelMatrix = glm::rotate(modelMatrix, glm::half_pi<float>()-camera.colatitude, -camera.GetLeftDirection());
+    modelMatrix = glm::rotate(modelMatrix, camera.azimuth-glm::half_pi<float>(), camera.upAxisDirection);
+    modelMatrix = glm::translate(modelMatrix, -unitX*0.5f*(1.0f-ratio));
+    modelMatrix = glm::scale(modelMatrix, {ratio*element.scale.x, element.scale.y,1.0f});
+    shader.setMat4("model", glm::value_ptr(modelMatrix));
+    auto currHp = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+    shader.setVec4("tintColor", glm::value_ptr(currHp));
+    element.rect->Draw(shader);
+    shader.setVec4("tintColor", glm::value_ptr(ones4));
+    glEnable(GL_DEPTH_TEST);
+}
+*/
 
 int main()
 {
@@ -33,17 +76,10 @@ int main()
     std::vector<Model> models;
     LoadModels(models);
 
-    Rectangle smiley(1.0f,1.0f,"images/awesomeface.png");
-    Rectangle container(1.0f,3.0f,"images/container.jpg");
-    Rectangle container2(2.0f,1.0f,"images/container.jpg");
-    Rectangle mcdirt(1.0f,1.0f,"images/minecraft_dirt.png");
-    Rectangle wall(1.0f, 1.0f, "images/wall.jpg");
-    Rectangle whitecircle(2.0f,2.0f,"images/2dcircle/diffuse.png");
+    const std::string render2dpath = "/images/render2dtextures";
+    Render2DManager::addQuads(render2dpath.c_str());
 
-    std::cerr << "Wawaweewa" << std::endl;
-    Shader shader((projectRoot + "/Render/shader.vert").c_str(), (projectRoot + "/Render/shader.frag").c_str());
-    std::cerr << "Wawaweewa" << std::endl;
-
+    Shader shader("/Render/shader.vert", "/Render/shader.frag");
 
     std::vector<glm::vec3> modelPositions(models.size());
     std::vector<glm::vec2> modelRotations(models.size());
@@ -52,142 +88,121 @@ int main()
     auto& camera = window.camera;
 
 
-    //SET DEFAULTS FOR UNIFORMS AFTER THIS
+    //SET DEFAULTS FOR UNIFORMS
     shader.use();
     shader.setVec4("tintColor", glm::value_ptr(ones4));
 
-    //enable stuff
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    UISystem::Init(camera);
 
+
+    constexpr int mainElementCount = 4;
+    LinearButtonArray<mainElementCount> combatMain;
+    {
+        UISystem::SetElementsSame(combatMain, "container");
+        glm::vec2 scale = {2.0f, 1.0f};
+        UISystem::SetScale(combatMain, scale);
+        glm::vec2 initialPos = {-4.5f, -2.0f};
+        glm::vec2 finalPos = {4.5f, -2.0f};
+        UISystem::SetUIElementPosLine(combatMain, initialPos, finalPos);
+    }
+
+    constexpr int abilityCount = 8;
+    LinearButtonArray<abilityCount> combatSkills;
+    {
+        UISystem::SetElementsSame(combatSkills, "container");
+        glm::vec2 scale = {2.0f, 0.75f};
+        UISystem::SetScale(combatSkills, scale);
+        glm::vec2 initialPos = {-4.5f, 3.0f};
+        glm::vec2 finalPos = {-4.5f, -4.0f};
+        UISystem::SetUIElementPosLine(combatSkills, initialPos, finalPos);
+    }
+
+
+    glm::mat4 modelMatrix;
+    glm::mat4 projectionMatrix;
+    glm::mat4 viewMatrix;
+    initGLSettings();
 
     //Rendering loop ---------------------------------------------------------------------------------
     while (!glfwWindowShouldClose(window()))
     {
-        if (!mouse.locked && !mouse.hidden)
+        window.UpdateDeltaTime();
+        window.FPSCounterTitle();
+
+        if (mouse.enabled)
         {
             ImGuiThing::ShowModelMoveWindow(modelPositions, modelRotations);
         }
 
-        window.UpdateDeltaTime();
-        camera.UpdateFallingPhysics(camera.position, camera.velocity, window.deltaTime);
+        UpdateFallingPhysics(camera.position, camera.velocity, window.deltaTime);
         window.processInput();
-        if (!window.combatUIStart)
+        if (window.combatUIStart)
         {
-            mouse.locked = false;
-            window.processMovementInput();
+            camera.locked = true;
         } else
         {
-            mouse.locked = true;
+            camera.locked = false;
+            window.processMovementInput();
         }
-
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         //3D ZONE------------------------------------------------------
         glEnable(GL_DEPTH_TEST);
-        shader.setPerspProjMatrix(camera.GetFOV(), Window::WIDTH, Window::HEIGHT);
-        shader.setViewMatrix(camera.GetViewMatrix1stPerson());
+        shader.use();
+
+        projectionMatrix = glm::perspective(glm::radians(camera.GetFOV()), static_cast<float>(Window::WIDTH)/Window::HEIGHT, 0.1f, 100.0f);
+        viewMatrix = camera.GetViewMatrix1stPerson();
+
+        shader.setMat4("projection", glm::value_ptr(projectionMatrix));
+        shader.setMat4("view", glm::value_ptr(viewMatrix));
 
         for (int i = 0; i < models.size(); i++)
         {
-            auto colatitude = modelRotations[i].x;
-            auto azimuth = modelRotations[i].y;
-            shader.setModelMatrix(modelPositions[i], ones3, colatitude, azimuth);
+            shader.setModelMatrix(modelMatrix, modelPositions[i], ones3, modelRotations[i].x, modelRotations[i].y);
             models[i].Draw(shader);
+            /*
+            UIElement whiterect(rectangles[0]);
+            whiterect.scale = {1.0f, 0.1f};
+            DrawHpBar(shader, camera, whiterect, modelPositions[i] + unitY, 0.5f);
+            */
         }
 
-        shader.setModelMatrix({-7.0f, 0.0f, -3.0f}, ones3);
-        container.Draw(shader);
+        shader.setModelMatrix(modelMatrix, {-7.0f, 0.0f, -3.0f}, ones3);
+        Render2DManager::Draw(shader, Render2DManager::GetRender2D("container"));
 
-        shader.setModelMatrix({-3.0f, -1.0f, -5.0f}, ones3);
-        mcdirt.Draw(shader);
+        shader.setModelMatrix(modelMatrix, {-3.0f, -1.0f, -5.0f}, ones3);
+        Render2DManager::Draw(shader, Render2DManager::GetRender2D("minecraft_dirt"));
 
         //drawing the floor
         float sideLength = 20.0f;
-        DrawFloor(shader, wall, sideLength);
+        DrawFloor(shader, modelMatrix, "wall", sideLength);
 
         //2D ZONE-------------------------------------------------
         glDisable(GL_DEPTH_TEST);
-        shader.setOrthoProjMatrix(Window::halfWidth/100.0f, Window::halfHeight/100.0f);
+        shader.setOrthoProjMatrix(projectionMatrix, Window::halfWidth/100.0f, Window::halfHeight/100.0f);
 
         UISystem::Init(camera);
 
-        UIMenu combatMain;
-        constexpr int mainElementCount = 4;
-        UISystem::SetElementsSame(combatMain, container2, mainElementCount);
-        constexpr glm::vec2 combatMainPosIni = {-4.5f, -2.0f};
-        constexpr glm::vec2 combatMainPosFin = {4.5f, -2.0f};
-        UISystem::SetUIElementPosLine(combatMain, combatMainPosIni, combatMainPosFin);
-
-        UIMenu combatSkills;
-        constexpr int abilityCount = 8;
-        UISystem::SetElementsSame(combatSkills, container, abilityCount);
-        constexpr glm::vec2 combatSkillsPosIni = {-4.5f, 2.0f};
-        constexpr glm::vec2 combatSkillsPosFin = {-4.5f, -2.0f};
-        UISystem::SetUIElementPosLine(combatSkills, combatSkillsPosIni, combatSkillsPosFin);
-
         if (window.combatUIStart)
         {
-            if (window.combatUIMain)
-            {
-                combatMain.currentElement = window.processCombatUIInput(window(), combatMain.currentElement, mainElementCount);
-                UISystem::
-
-
-                if (window.positiveEdgeCheck(window(), GLFW_KEY_ENTER))
-                {
-                    smiley.Draw(shader);
-                    window.combatUIMain = false;
-                    switch (window.currentUIElement)
-                    {
-                    case 0:
-                        window.combatUISkills = true;
-                        break;
-                    default:
-                        window.combatUIStart = false;
-                    }
-                }
-            } else if (window.combatUISkills)
-            {
-
-                auto prevElement = window.currentUIElement;
-                window.currentUIElement = std::clamp(window.currentUIElement, 0, abilityCount);
-                window.currentUIElement = window.processCombatUIInput(window(), window.currentUIElement, abilityCount);
-                if (window.currentUIElement != prevElement) {UISystem::ResetTimer();}
-                float frequency = 1.0f;
-                float timeMod = cosTimeDomain(0.0f,1.0f,frequency);
-                auto rgbMult = ones3;
-                auto netColorMult = glm::vec4(rgbMult+timeMod, 1.0f);
-                UISystem::UpdateTimer(window.deltaTime);
-                UISystem::drawPrototypeUIElements(shader, container2, netColorMult, window.currentUIElement, abilityCount, {-5.0f, 3.0f}, -glm::half_pi<float>(), 0.75f);
-
-                if (window.positiveEdgeCheck(window(), GLFW_KEY_ENTER))
-                {
-                    window.combatUISkills = false;
-                    window.combatUIActionComplete = true;
-                    //use demon.skills[currentUIElement]
-                }
-            } else if (window.combatUIActionComplete)
-            {
-                window.combatUIActionComplete = false;
-                window.combatUIStart = false;
-            }
-
-
+            UISystem::CombatUI(window, shader, combatMain, combatSkills);
         } else
         {
             UISystem::Translate({-5.0f, -2.5f});
-            UISystem::DrawRect(shader, whitecircle);
+            UISystem::DrawRender2D(shader, "whitecircle");
 
             UISystem::Translate({-5.8f, 3.0f});
-            UISystem::DrawRect(shader, smiley);
+            UISystem::DrawRender2D(shader, "awesomeface");
         }
 
 
         //imgui thingy
-        if (!mouse.locked && !mouse.hidden) {ImGuiThing::Render();}
+        if (mouse.enabled)
+        {
+            ImGuiThing::Render();
+        }
 
         //swap buffers
         glfwSwapBuffers(window());

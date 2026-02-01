@@ -17,10 +17,16 @@ struct Vertex
     glm::vec2 TexCoords;
 };
 
+enum class TextureType
+{
+    Diffuse,
+    Specular
+};
+
 struct Texture
 {
     unsigned int id;
-    std::string type;
+    TextureType type;
     std::string path;
 };
 

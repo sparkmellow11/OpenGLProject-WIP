@@ -52,6 +52,8 @@ add_executable(OpenGLStuff main.cpp
         Render/UISystem.cpp
         Render/UISystem.hpp
         UtilsMain.hpp
+        Render2DManager.cpp
+        Render2DManager.hpp
 )
 
 

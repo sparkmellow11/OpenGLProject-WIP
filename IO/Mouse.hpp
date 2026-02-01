@@ -4,20 +4,12 @@
 
 #pragma once
 
-enum class MouseState
-{
-    Disabled,
-    HiddenLocked,
-    Shown
-};
-
 struct Mouse
 {
     bool firstMove;
     float lastX;
     float lastY;
-    bool locked = false;
-    bool hidden = true;
+    bool enabled = false;
 
     Mouse(bool firstMove, float lastX, float lastY);
 };

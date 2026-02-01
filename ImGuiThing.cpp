@@ -10,13 +10,13 @@ void ImGuiThing::Init(const Window& window)
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 
-    // Setup Platform/Renderer backends
-    ImGui_ImplGlfw_InitForOpenGL(window.window, true);          // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
+    ImGui_ImplGlfw_InitForOpenGL(window(), true);
     ImGui_ImplOpenGL3_Init();
 }
+
 
 
 void ImGuiThing::ShowModelMoveWindow(std::vector<glm::vec3>& positions, std::vector<glm::vec2>& rotations)
@@ -24,18 +24,22 @@ void ImGuiThing::ShowModelMoveWindow(std::vector<glm::vec3>& positions, std::vec
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-    for (int i = 0; i < positions.size(); i++)
+    std::string itemStrs[positions.size()];
+    const char* items[positions.size()];
+    for (int i = 0; i < IM_ARRAYSIZE(items); i++)
     {
-        ImGui::PushID(i);
-        ImGui::Text("Model no. %d", i);
-        ImGui::SliderFloat("x ", &positions[i].x, -10.0f, 10.0f);
-        ImGui::SliderFloat("y", &positions[i].y, -10.0f, 10.0f);
-        ImGui::SliderFloat("z", &positions[i].z, -10.0f, 10.0f);
-        ImGui::SliderFloat("colatitude", &rotations[i].x, 0.0f, glm::pi<float>());
-        ImGui::SliderFloat("azimuth", &rotations[i].y, 0.0f, glm::two_pi<float>());
-        if (ImGui::Button("Save")) {}
-        ImGui::PopID();
+        itemStrs[i] = "Model no. " + std::to_string(i+1);
+        items[i] = itemStrs[i].c_str();
     }
+    static int currentIndex = 0;
+    ImGui::Combo("##Modelrepositioning", &currentIndex, items, IM_ARRAYSIZE(items));
+    constexpr float minmax = 5.0f;
+    ImGui::SliderFloat("x ", &positions[currentIndex].x, -minmax, minmax);
+    ImGui::SliderFloat("y", &positions[currentIndex].y, -minmax, minmax);
+    ImGui::SliderFloat("z", &positions[currentIndex].z, -minmax, minmax);
+    ImGui::SliderFloat("colatitude", &rotations[currentIndex].x, 0.0f, glm::two_pi<float>());
+    ImGui::SliderFloat("azimuth", &rotations[currentIndex].y, 0.0f, glm::two_pi<float>());
+    if (ImGui::Button("Save")) {}
 }
 
 void ImGuiThing::Render()

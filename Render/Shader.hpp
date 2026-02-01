@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <glad/glad.h>
-
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -13,6 +11,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "../Utils.hpp"
 
 class Shader
 {
@@ -29,17 +28,17 @@ public:
     void setMat4(const ::std::string& name, const float *matrix) const;
     void setVec4(const std::string& name, const float* vec) const;
 
-    void setModelMatrix(const glm::vec3& translation, const glm::vec3& scaling,
-                        float rotation, const glm::vec3& rotationAxis);
+    void setModelMatrix(glm::mat4& modelMatrix, const glm::vec3& translation, const glm::vec3& scaling,
+                            float rotation, const glm::vec3& rotationAxis) const;
 
-    void setModelMatrix(const glm::vec3& translation, const glm::vec3& scaling);
+    void setModelMatrix(glm::mat4& modelMatrix, const glm::vec3& translation, const glm::vec3& scaling) const;
 
-    void setModelMatrix(const glm::vec3& translation, const glm::vec3& scaling,
-                        float colatitude, float azimuth);
+    void setModelMatrix(glm::mat4& modelMatrix, const glm::vec3& translation, const glm::vec3& scaling,
+                        float colatitude, float azimuth) const;
 
-    void setOrthoProjMatrix(float halfWidth, float halfHeight);
+    void setOrthoProjMatrix(glm::mat4& projectionMatrix, float halfWidth, float halfHeight) const;
 
-    void setPerspProjMatrix(float fov, float width, float height);
+    void setPerspProjMatrix(glm::mat4& projectionMatrix, float fov, float width, float height) const;
 
     void setViewMatrix(const glm::mat4& viewMatrix) const;
 };

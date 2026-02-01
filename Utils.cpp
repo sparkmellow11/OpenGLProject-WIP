@@ -4,6 +4,7 @@
 
 #include "Utils.hpp"
 #define STB_IMAGE_IMPLEMENTATION
+
 #include "stb_image.h"
 
 unsigned int TextureFromFile(const char *path, const std::string &directory)
@@ -67,12 +68,22 @@ glm::vec3 GetCameraLeftDirection(const float azimuth)
         return {-glm::sin(azimuth), 0.0f, -glm::cos(azimuth)};
 }
 
-float cosTimeDomain(const float min, const float max, const float frequency)
+float cosTimeDomain(const float min, const float max, const float frequency, const float time)
 {
         const auto mean = (min + max) / 2.0f;
         const auto maxDiff = std::abs(max - mean);
-        const auto time = static_cast<float>(glfwGetTime());
         const auto angularFrequency = glm::two_pi<float>()*frequency;
         return maxDiff*glm::cos(angularFrequency*time)+mean;
 }
 
+void UpdateFallingPhysics(glm::vec3& position, glm::vec3& velocity, const float deltaTime)
+{
+        constexpr float gravAccel = -9.81f;
+        velocity.y += gravAccel*deltaTime;
+        position += velocity*deltaTime;
+        if (position.y < 0.0f && velocity.y < 0.0f)
+        {
+                position.y = 0.0f;
+                velocity.y = 0.0f;
+        }
+}

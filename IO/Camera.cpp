@@ -10,7 +10,7 @@ Camera::Camera(const glm::vec3 cameraPos, const glm::vec3 cameraDirection, const
     position(cameraPos),
     velocity(),
     facingDirection(cameraDirection),
-    upDirection(glm::vec3(0.0f, 1.0f, 0.0f)),
+    upAxisDirection(glm::vec3(0.0f, 1.0f, 0.0f)),
     sensitivity(sensitivity),
     fov(45.0f)
 {
@@ -39,12 +39,12 @@ void Camera::ModifyCameraFOV(const float deltaFov)
 
 glm::mat4 Camera::GetViewMatrix1stPerson() const
 {
-    return glm::lookAt(position, position + facingDirection, upDirection);
+    return glm::lookAt(position, position + facingDirection, upAxisDirection);
 }
 
 glm::mat4 Camera::GetViewMatrix3rdPerson(const glm::vec3 target, const float distance) const
 {
-    return glm::lookAt(target - distance*facingDirection, target, upDirection);
+    return glm::lookAt(target - distance*facingDirection, target, upAxisDirection);
 }
 
 glm::vec3 Camera::GetPosition() const
@@ -59,7 +59,7 @@ glm::vec3 Camera::GetFacingDirection() const
 
 glm::vec3 Camera::GetUpDirection() const
 {
-    return upDirection;
+    return upAxisDirection;
 }
 
 float Camera::GetFOV() const
@@ -80,16 +80,4 @@ glm::vec3 Camera::GetLeftDirection() const
 glm::vec3 Camera::GetScreenUpDirection() const
 {
     return glm::cross(facingDirection, GetLeftDirection());
-}
-
-void Camera::UpdateFallingPhysics(glm::vec3& position, glm::vec3& velocity, const float deltaTime)
-{
-    constexpr float gravAccel = 9.81f;
-    velocity += glm::vec3(0.0f, -gravAccel*deltaTime, 0.0f);
-    ModifyCameraPos(velocity*deltaTime);
-    if (position.y < 0.0f && velocity.y < 0.0f)
-    {
-        position.y = 0;
-        velocity = glm::vec3(0.0f);
-    }
 }

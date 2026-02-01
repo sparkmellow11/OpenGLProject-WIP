@@ -9,6 +9,7 @@
 #include "imgui/imgui_impl_opengl3.h"
 #include <vector>
 #include "IO/Window.hpp"
+#include "Render/Model.hpp"
 
 namespace ImGuiThing
 {

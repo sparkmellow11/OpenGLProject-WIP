@@ -18,13 +18,15 @@ void Mesh::Draw(const Shader& shader) const
         glActiveTexture(GL_TEXTURE0 + i); // activate texture unit first
         // retrieve texture number (the N in diffuse_textureN)
         std::string number;
-        std::string name = textures[i].type;
-        if(name == "texture_diffuse")
+        std::string name;
+        if (textures[i].type == TextureType::Diffuse)
         {
+            name = "texture_diffuse";
             number = std::to_string(diffuseNr++);
         }
-        else if(name == "texture_specular")
+        else if (textures[i].type == TextureType::Specular)
         {
+            name = "texture_specular";
             number = std::to_string(specularNr++);
         }
         shader.setFloat((name + number).c_str(), (float)i);
