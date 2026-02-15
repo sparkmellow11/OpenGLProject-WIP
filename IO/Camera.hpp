@@ -5,11 +5,10 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include "../Utils.hpp"
 
 class Camera {
 public:
-    Camera(glm::vec3 cameraPos, glm::vec3 cameraDirection, float sensitivity);
+    Camera(glm::vec3 cameraPos, glm::vec3 cameraDirection);
 
     void UpdateCamera(glm::vec2 mouseOffset);
 
@@ -31,20 +30,25 @@ public:
 
     [[nodiscard]] glm::vec3 GetPlaneFacingDirection() const;
 
-    [[nodiscard]] glm::vec3 GetLeftDirection() const;
+    [[nodiscard]] glm::vec3 GetScreenRight() const;
 
-    [[nodiscard]] glm::vec3 GetScreenUpDirection() const;
+    [[nodiscard]] glm::vec3 GetScreenUp() const;
 
-//private:
+
     float colatitude;
     float azimuth;
+
     glm::vec3 position;
     glm::vec3 velocity;
-    glm::vec3 facingDirection;
+
     glm::vec3 upAxisDirection;
+    glm::vec3 facingDirection;
+    glm::vec3 screenUp;
+    glm::vec3 screenRight;
+
     float sensitivity;
     float fov;
     float speed;
-    bool locked = false;
 
+    bool locked = false;
 };

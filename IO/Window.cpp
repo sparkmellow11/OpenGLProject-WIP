@@ -126,11 +126,11 @@ void Window::processMovementInput() const
     }
     if (isKeyPressed(GLFW_KEY_A))
     {
-        camera.ModifyCameraPos(camera.GetLeftDirection()*camera.speed);
+        camera.ModifyCameraPos(-camera.screenRight*camera.speed);
     }
     if (isKeyPressed(GLFW_KEY_D))
     {
-        camera.ModifyCameraPos(-camera.GetLeftDirection()*camera.speed);
+        camera.ModifyCameraPos(camera.screenRight*camera.speed);
     }
     if (isKeyPressed(GLFW_KEY_SPACE) && camera.GetPosition().y == 0.0f)
     {
@@ -138,7 +138,7 @@ void Window::processMovementInput() const
     }
     if (isKeyPressed(GLFW_KEY_LEFT_CONTROL))
     {
-        camera.ModifyCameraPos(-camera.GetUpDirection()*camera.speed);
+        camera.position -= camera.GetUpDirection()*camera.speed;
     }
 }
 
@@ -217,9 +217,9 @@ void Window::FPSCounterTitle()
     frameCounter += 1.0f;
     if (timeDiff >= 1.0f / 30.0f)
     {
-        std::string FPS = std::to_string(frameCounter / timeDiff);
-        std::string ms = std::to_string(timeDiff / frameCounter * 1000.0f);
-        std::string newTitle = "OpenGLProject - " + FPS + "FPS, " + ms + "ms";
+        const std::string FPS = std::to_string(frameCounter / timeDiff);
+        const std::string ms = std::to_string(timeDiff / frameCounter * 1000.0f);
+        const std::string newTitle = "OpenGLProject - " + FPS + "FPS, " + ms + "ms";
         glfwSetWindowTitle(window, newTitle.c_str());
         timeDiff = 0.0f;
         frameCounter = 0.0f;

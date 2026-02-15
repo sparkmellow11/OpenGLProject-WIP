@@ -5,7 +5,6 @@
 #pragma once
 
 #include <unordered_map>
-
 #include "Render/Mesh.hpp"
 #include "Utils.hpp"
 
@@ -14,6 +13,7 @@ struct Render2D
     Texture texture;
     glm::vec4 tint = glm::vec4(1.0f);
 };
+
 
 struct Render2DManager
 {

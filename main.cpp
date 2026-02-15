@@ -12,21 +12,6 @@
 #include "Utils.hpp"
 #include "Render/UISystem.hpp"
 #include "UtilsMain.hpp"
-#include "imgui/imgui_internal.h"
-
-
-void initGLSettings()
-{
-    //enable stuff
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    //glEnable(GL_CULL_FACE);
-    glCullFace(GL_FRONT);
-    glFrontFace(GL_CW); // i guess
-    glfwSwapInterval(0);
-}
 
 /*
 void DrawHpBar(const Shader& shader, const Camera& camera, const UIElement& element, const glm::vec3& position, float ratio)
@@ -74,7 +59,7 @@ int main()
     ImGuiThing::Init(window);
 
     std::vector<Model> models;
-    LoadModels(models);
+    Utils::LoadModels(models);
 
     const std::string render2dpath = "/images/render2dtextures";
     Render2DManager::addQuads(render2dpath.c_str());
@@ -121,7 +106,7 @@ int main()
     glm::mat4 modelMatrix;
     glm::mat4 projectionMatrix;
     glm::mat4 viewMatrix;
-    initGLSettings();
+    Utils::initGLSettings();
 
     //Rendering loop ---------------------------------------------------------------------------------
     while (!glfwWindowShouldClose(window()))
@@ -152,7 +137,7 @@ int main()
         glEnable(GL_DEPTH_TEST);
         shader.use();
 
-        projectionMatrix = glm::perspective(glm::radians(camera.GetFOV()), static_cast<float>(Window::WIDTH)/Window::HEIGHT, 0.1f, 100.0f);
+        projectionMatrix = Utils::PerspectiveMatrix(camera);
         viewMatrix = camera.GetViewMatrix1stPerson();
 
         shader.setMat4("projection", glm::value_ptr(projectionMatrix));
@@ -169,15 +154,22 @@ int main()
             */
         }
 
-        shader.setModelMatrix(modelMatrix, {-7.0f, 0.0f, -3.0f}, ones3);
-        Render2DManager::Draw(shader, Render2DManager::GetRender2D("container"));
+        {
+            glm::vec3 pos = {-7.0f, 0.0f, -3.0f};
+            shader.setModelMatrix(modelMatrix, pos, ones3);
+            Render2DManager::Draw(shader, Render2DManager::GetRender2D("container"));
 
-        shader.setModelMatrix(modelMatrix, {-3.0f, -1.0f, -5.0f}, ones3);
-        Render2DManager::Draw(shader, Render2DManager::GetRender2D("minecraft_dirt"));
+            pos = {-3.0f, -1.0f, -5.0f};
+            shader.setModelMatrix(modelMatrix, pos, ones3);
+            Render2DManager::Draw(shader, Render2DManager::GetRender2D("minecraft_dirt"));
+        }
 
-        //drawing the floor
-        float sideLength = 20.0f;
-        DrawFloor(shader, modelMatrix, "wall", sideLength);
+
+        {
+            //drawing the floor
+            float sideLength = 20.0f;
+            Utils::DrawFloor(shader, modelMatrix, "wall", sideLength);
+        }
 
         //2D ZONE-------------------------------------------------
         glDisable(GL_DEPTH_TEST);

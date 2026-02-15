@@ -17,7 +17,6 @@ struct KeyboardKey
 {
     GLint key;
     bool wasPressed = false;
-    bool currentlyPressed = false;
     static inline int keyCount = 0;
     KeyboardKey() : key(keyCount) {keyCount++;}
     explicit KeyboardKey(const GLint key) : key(key) {}
@@ -34,7 +33,7 @@ struct Window
     static inline float halfHeight = static_cast<float>(HEIGHT)/2.0f;
 
     static inline auto mouse = Mouse(true,halfWidth, halfHeight);
-    static inline auto camera = Camera({0,0,3}, {0,0,-1}, 0.1);
+    static inline auto camera = Camera({0,0,3}, {0,0,-1});
 
     float lastFrameTime = 0.0f;
     float currentFrameTime = 0.0f;
@@ -66,8 +65,8 @@ struct Window
     void processMovementInput() const;
     void UpdateDeltaTime();
 
-    bool positiveEdgeCheck(GLFWwindow* window, GLint key);
-    bool negativeEdgeCheck(GLFWwindow* window, GLint key);
-    int processCombatUIInput(GLFWwindow* window, int currentUIElement, int maxUIElements);
+    static bool positiveEdgeCheck(GLFWwindow* window, GLint key);
+    static bool negativeEdgeCheck(GLFWwindow* window, GLint key);
+    static int processCombatUIInput(GLFWwindow* window, int currentUIElement, int maxUIElements);
     void FPSCounterTitle();
 };

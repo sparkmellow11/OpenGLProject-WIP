@@ -6,11 +6,9 @@
 
 void UISystem::Init(const Camera& camera)
 {
-    screenRight = -camera.GetLeftDirection();
-    screenUp = camera.GetScreenUpDirection();
     initialModelMatrix = glm::mat4(1.0f);
     initialModelMatrix = glm::translate(initialModelMatrix, camera.position);
-    initialModelMatrix = glm::rotate(initialModelMatrix, camera.colatitude-glm::half_pi<float>(), -screenRight);
+    initialModelMatrix = glm::rotate(initialModelMatrix, camera.colatitude-glm::half_pi<float>(), -camera.screenRight);
     initialModelMatrix = glm::rotate(initialModelMatrix, camera.azimuth-glm::half_pi<float>(), camera.upAxisDirection);
     finalModelMatrix = initialModelMatrix;
 }

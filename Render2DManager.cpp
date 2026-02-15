@@ -91,7 +91,7 @@ void Render2DManager::addQuads(const char* directory)
         if (std::filesystem::is_regular_file(entry.status())) {
             std::filesystem::path relative_path = std::filesystem::relative(entry.path(), projectRoot);
             std::string path = relative_path.generic_string();
-            const int start = path.find_last_of('/')+1;
+            const int start = static_cast<int>(path.find_last_of('/'))+1;
             std::string name = path.substr(start, path.size()-start-4);
             renders[name] = setupQuad(path.c_str());
         }

@@ -128,10 +128,10 @@ struct UISystem
         if (window.combatUIMain)
         {
             static int currentElement = 0;
-            currentElement = window.processCombatUIInput(window(), currentElement, N);
+            currentElement = Window::processCombatUIInput(window(), currentElement, N);
             UISystem::DrawAllButtonElements(shader, combatMain, colour, currentElement);
 
-            if (window.positiveEdgeCheck(window(), GLFW_KEY_ENTER))
+            if (Window::positiveEdgeCheck(window(), GLFW_KEY_ENTER))
             {
                 window.combatUIMain = false;
                 switch (currentElement)
@@ -141,15 +141,16 @@ struct UISystem
                     break;
                 default:
                     window.combatUIStart = false;
+                    break;
                 }
             }
         } else if (window.combatUISkills)
         {
             static int currentElement = 0;
-            currentElement = window.processCombatUIInput(window(), currentElement, M);
+            currentElement = Window::processCombatUIInput(window(), currentElement, M);
             UISystem::DrawAllButtonElements(shader, combatSkills, colour, currentElement);
 
-            if (window.positiveEdgeCheck(window(), GLFW_KEY_ENTER))
+            if (Window::positiveEdgeCheck(window(), GLFW_KEY_ENTER))
             {
                 window.combatUISkills = false;
                 window.combatUIActionComplete = true;
@@ -165,8 +166,6 @@ struct UISystem
 private:
     static inline glm::mat4 initialModelMatrix;
     static inline glm::mat4 finalModelMatrix;
-    static inline glm::vec3 screenRight;
-    static inline glm::vec3 screenUp;
     static inline float timer = 0.0f;
 
 };

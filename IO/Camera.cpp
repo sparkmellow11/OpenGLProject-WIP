@@ -3,16 +3,20 @@
 //
 
 #include "Camera.hpp"
+#include "../Utils.hpp"
 
-Camera::Camera(const glm::vec3 cameraPos, const glm::vec3 cameraDirection, const float sensitivity)
+Camera::Camera(const glm::vec3 cameraPos, const glm::vec3 cameraDirection)
     : colatitude(glm::half_pi<float>()),
     azimuth(glm::half_pi<float>()),
     position(cameraPos),
-    velocity(),
-    facingDirection(cameraDirection),
+    velocity(glm::vec3(0.0f)),
     upAxisDirection(glm::vec3(0.0f, 1.0f, 0.0f)),
-    sensitivity(sensitivity),
-    fov(45.0f)
+    facingDirection(cameraDirection),
+    screenUp(GetScreenUp()),
+    screenRight(GetScreenRight()),
+    sensitivity(0.1f),
+    fov(45.0f),
+    speed(1.0f)
 {
 }
 
@@ -24,6 +28,8 @@ void Camera::UpdateCamera(glm::vec2 mouseOffset)
     colatitude -= mouseOffset.y; //adding goes downwards, hence mouse up would be look down, so use negative
     colatitude = glm::clamp(colatitude, 0.1f, glm::pi<float>()-0.1f);
     facingDirection = GetSphericalDirection(colatitude, azimuth);
+    screenRight = GetScreenRight();
+    screenUp = GetScreenUp();
 }
 
 void Camera::ModifyCameraPos(const glm::vec3 displacement)
@@ -72,12 +78,12 @@ glm::vec3 Camera::GetPlaneFacingDirection() const
     return {glm::cos(azimuth), 0.0f, -glm::sin(azimuth)};
 }
 
-glm::vec3 Camera::GetLeftDirection() const
+glm::vec3 Camera::GetScreenRight() const
 {
-    return {-glm::sin(azimuth), 0.0f, -glm::cos(azimuth)};
+    return glm::normalize(glm::cross(facingDirection, upAxisDirection));
 }
 
-glm::vec3 Camera::GetScreenUpDirection() const
+glm::vec3 Camera::GetScreenUp() const
 {
-    return glm::cross(facingDirection, GetLeftDirection());
+    return glm::cross(facingDirection, GetScreenRight());
 }
