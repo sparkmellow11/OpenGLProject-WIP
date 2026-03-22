@@ -4,6 +4,9 @@ project(OpenGLStuff)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 #set(CMAKE_C_COMPILER gcc)
 #set(CMAKE_CXX_COMPILER g++)
 
@@ -102,4 +105,3 @@ target_link_libraries(OpenGLStuff
 
 
 target_compile_definitions(OpenGLStuff PRIVATE PROJECT_ROOT="${CMAKE_SOURCE_DIR}")
-
