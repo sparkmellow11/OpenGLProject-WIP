@@ -32,17 +32,18 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(glfw)
 
 # ASSIMP
-set(ASSIMP_BUILD_ASSIMP_TOOLS OFF) # Disable building extra tools
-set(ASSIMP_BUILD_TESTS OFF) # Disable building tests
-set(ASSIMP_NO_EXPORT ON) #Disable all exporters
-set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF) # Disable all importers by default
-set(ASSIMP_BUILD_OBJ_IMPORTER ON)
-set(ASSIMP_BUILD_FBX_IMPORTER ON)
+set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE) # Disable building extra tools
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE) # Disable building tests
+set(ASSIMP_NO_EXPORT ON CACHE BOOL "" FORCE) #Disable all exporters
+set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE) # Disable all importers by default
+set(ASSIMP_BUILD_OBJ_IMPORTER ON CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_FBX_IMPORTER ON CACHE BOOL "" FORCE)
 
 FetchContent_Declare(
   assimp
   GIT_REPOSITORY https://github.com/assimp/assimp.git
   GIT_TAG v5.3.1
+  GIT_SHALLOW TRUE
 )
 FetchContent_MakeAvailable(assimp)
 
